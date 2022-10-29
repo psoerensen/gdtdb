@@ -1,0 +1,91 @@
+---
+title: 'Brief Introduction to R package gact'
+author: "Palle Duun Rohde, Izel Fourie Sørensen, & Peter Sørensen"
+date: "`r Sys.Date()`"
+bibliography: qg2021.bib
+biblio-style: apalike
+link-citations: yes
+output:
+  bookdown::pdf_document2:
+    dev: png
+    includes:
+      in_header: preamble.tex
+  html_document:
+    includes:
+      in_header: mathjax_header.html
+---
+
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, tidy.opts = list(width.cutoff = 70), tidy = TRUE)
+eval <- TRUE
+echo_solution <- TRUE
+message <- FALSE
+```
+
+# Introduction
+The practical is based on the R package `gact` (Rohde et al.2022)). This package provides an infrastructure for working with large-scale genomic association data linked to different types of genomic features.
+
+The most recent version of `gact` can be obtained from github:
+
+```{r,  eval=FALSE, echo=TRUE}
+library(devtools)
+devtools::install_github("psoerensen/gact")
+```
+
+## Load packages used {.unlisted .unnumbered} 
+
+```{r,  eval=eval, echo=TRUE}
+library(gact)
+library(qgg)
+
+library(org.Hs.eg.db)
+library(reactome.db)
+
+library(corrplot)
+```
+
+## Download and install GDT database {.unlisted .unnumbered} 
+The function `gact()` dowload and install the GDT database: 
+```{r,  eval=TRUE, echo=TRUE}
+# Set working for database
+setwd("C://Users//au223366//Dropbox//Projects//balder")
+
+# Download data bases from repository
+GACTdb <- gact(version="t2dm-gact-0.0.1", task="download")
+str(GACTdb)
+```
+
+## Extract data from GDT database {.unlisted .unnumbered} 
+The function `getStat()` extract data from the database: 
+```{r,  eval=TRUE, echo=TRUE}
+
+# Extract data from T2D for genomic feature Genes
+stat <- getStat(GACTdb=GACTdb, trait="t2d", feature="Genes")
+head(stat)
+
+# Extract data from T2D for genomic feature Gene Ontology (GO) where output format is a data frame 
+stat <- getStat(GACTdb=GACTdb, trait="t2d", feature="GO")
+head(stat)
+
+# Extract data from T2D for genomic feature Gene Ontology (GO) where output format is list 
+stat <- getStat(GACTdb=GACTdb, trait="t2d", feature="GO", format="list", cls=c("p=1e.04","p=0.001","p=0.05","p=0.1","p=0.95"))
+str(stat)
+
+# Plot results for genomic feature Gene Ontology (GO) 
+colbar <- colorRampPalette(c("#FFFFFF", "#D1E5F0", "#92C5DE",
+                             "#4393C3", "#2166AC", "#053061"))
+corrplot(-log10(stat$p[1:10,]), is.corr=FALSE,
+         tl.cex=0.7, tl.srt=45, col=colbar(6),
+         cl.pos="n", mar = c(1, 1, 1, 1))
+```
+
+## Extract and write data from GDT database {.unlisted .unnumbered} 
+The function `writeStat()` extract and write data from the database: 
+```{r,  eval=TRUE, echo=TRUE}
+writeStat(GACTdb=GACTdb, feature="GO", trait="t2d", file.csv="go_t2dm_gcta.csv")
+writeStat(GACTdb=GACTdb, feature="Pathways", trait="t2d", file.csv="pathways_t2dm_gcta.csv")
+writeStat(GACTdb=GACTdb, feature="ProteinComplexes", trait="t2d", file.csv="proteincomplexes_t2dm_gcta.csv")
+writeStat(GACTdb=GACTdb, feature="ChemicalComplexes", trait="t2d", file.csv="chemicalcomplexes_t2dm_gcta.csv")
+writeStat(GACTdb=GACTdb, feature="Genes", trait="t2d", file.csv="genes_t2dm_gcta.csv")
+```
