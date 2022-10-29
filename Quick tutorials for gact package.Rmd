@@ -23,7 +23,6 @@ echo_solution <- TRUE
 message <- FALSE
 ```
 
-# Introduction
 The practical is based on the R package `gact` (Rohde et al.2022)). This package provides an infrastructure for working with large-scale genomic association data linked to different types of genomic features.
 
 The most recent version of `gact` can be obtained from github:
@@ -53,7 +52,6 @@ setwd("C://Users//au223366//Dropbox//Projects//balder")
 
 # Download data bases from repository
 GACTdb <- gact(version="t2dm-gact-0.0.1", task="download")
-str(GACTdb)
 ```
 
 ## Extract data from GDT database {.unlisted .unnumbered} 
