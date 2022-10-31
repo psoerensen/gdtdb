@@ -37,10 +37,6 @@ devtools::install_github("psoerensen/gact")
 ```{r,  eval=eval, echo=TRUE}
 library(gact)
 library(qgg)
-
-library(org.Hs.eg.db)
-library(reactome.db)
-
 library(corrplot)
 ```
 
@@ -48,26 +44,32 @@ library(corrplot)
 The function `gact()` dowload and install the GDT database: 
 ```{r,  eval=TRUE, echo=TRUE}
 # Set working for database
-setwd("C://Users//au223366//Dropbox//Projects//balder")
+setwd("C://Users//au223366//Dropbox//GitHub//gdtdb")
 
 # Download data bases from repository
-GACTdb <- gact(version="t2dm-gact-0.0.1", task="download")
+GAlist <- gact(version="t2dm-gact-0.0.1", task="download")
 ```
 
 ## Extract data from GDT database {.unlisted .unnumbered} 
 The function `getStat()` extract data from the database: 
 ```{r,  eval=TRUE, echo=TRUE}
 
+# Extract data from T2D for genomic feature Markers
+#stat <- getStat(GAlist=GAlist, trait="t2d", feature="Markers")
+#head(stat)
+
 # Extract data from T2D for genomic feature Genes
-stat <- getStat(GACTdb=GACTdb, trait="t2d", feature="Genes")
+stat <- getStat(GAlist=GAlist, trait="t2d", feature="Genes")
 head(stat)
+plot(x=stat$stat/stat$m,y=-log10(stat$p), ylab="-log10P", xlab="Tmean",frame.plot=FALSE,main="Genes")
 
 # Extract data from T2D for genomic feature Gene Ontology (GO) where output format is a data frame 
-stat <- getStat(GACTdb=GACTdb, trait="t2d", feature="GO")
+stat <- getStat(GAlist=GAlist, trait="t2d", feature="GO")
 head(stat)
+plot(x=stat$stat/stat$m,y=-log10(stat$p), ylab="-log10P", xlab="Tmean",frame.plot=FALSE,main="GO")
 
 # Extract data from T2D for genomic feature Gene Ontology (GO) where output format is list 
-stat <- getStat(GACTdb=GACTdb, trait="t2d", feature="GO", format="list", cls=c("p=1e.04","p=0.001","p=0.05","p=0.1","p=0.95"))
+stat <- getStat(GAlist=GAlist, trait="t2d", feature="GO", format="list", cls=c("p=1e.04","p=0.001","p=0.05","p=0.1","p=0.95"))
 str(stat)
 
 # Plot results for genomic feature Gene Ontology (GO) 
@@ -81,9 +83,9 @@ corrplot(-log10(stat$p[1:10,]), is.corr=FALSE,
 ## Extract and write data from GDT database {.unlisted .unnumbered} 
 The function `writeStat()` extract and write data from the database: 
 ```{r,  eval=TRUE, echo=TRUE}
-writeStat(GACTdb=GACTdb, feature="GO", trait="t2d", file.csv="go_t2dm_gcta.csv")
-writeStat(GACTdb=GACTdb, feature="Pathways", trait="t2d", file.csv="pathways_t2dm_gcta.csv")
-writeStat(GACTdb=GACTdb, feature="ProteinComplexes", trait="t2d", file.csv="proteincomplexes_t2dm_gcta.csv")
-writeStat(GACTdb=GACTdb, feature="ChemicalComplexes", trait="t2d", file.csv="chemicalcomplexes_t2dm_gcta.csv")
-writeStat(GACTdb=GACTdb, feature="Genes", trait="t2d", file.csv="genes_t2dm_gcta.csv")
+writeStat(GAlist=GAlist, feature="GO", trait="t2d", file.csv="go_t2dm_gcta.csv")
+writeStat(GAlist=GAlist, feature="Pathways", trait="t2d", file.csv="pathways_t2dm_gcta.csv")
+writeStat(GAlist=GAlist, feature="ProteinComplexes", trait="t2d", file.csv="proteincomplexes_t2dm_gcta.csv")
+writeStat(GAlist=GAlist, feature="ChemicalComplexes", trait="t2d", file.csv="chemicalcomplexes_t2dm_gcta.csv")
+writeStat(GAlist=GAlist, feature="Genes", trait="t2d", file.csv="genes_t2dm_gcta.csv")
 ```
