@@ -1,5 +1,5 @@
 ---
-title: 'Brief Introduction to R package gact'
+title: 'Brief introduction to Genomic informed Drug Target database'
 author: "BALDER team"
 date: "`r Sys.Date()`"
 bibliography: qg2021.bib
@@ -104,7 +104,6 @@ writeStat(GAlist=GAlist, feature="Genes", trait="t2d", file.csv="genes_t2dm_gcta
 ## Extract marker set data from GDT database {.unlisted .unnumbered} 
 The marker sets in the database can be extracted using: 
 ```{r,  eval=TRUE, echo=TRUE}
-str(GAlist$gsets)
 geneSets <- getSets(GAlist=GAlist,feature="Genes")
 chemSets <- getSets(GAlist=GAlist,feature="ChemicalComplexes2Genes")
 
