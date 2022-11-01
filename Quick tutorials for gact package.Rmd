@@ -1,6 +1,6 @@
 ---
 title: 'Brief Introduction to R package gact'
-author: "Palle Duun Rohde, Izel Fourie Sørensen, & Peter Sørensen"
+author: "BALDER team"
 date: "`r Sys.Date()`"
 bibliography: qg2021.bib
 biblio-style: apalike
@@ -48,6 +48,11 @@ setwd("C://Users//au223366//Dropbox//GitHub//gdtdb")
 
 # Download data bases from repository
 GAlist <- gact(version="t2dm-gact-0.0.1", task="download")
+GAlist$features
+
+# Information about features in GDT database
+GAlist$features
+
 ```
 
 ## Extract data from GDT database {.unlisted .unnumbered} 
@@ -55,8 +60,14 @@ The function `getStat()` extract data from the database:
 ```{r,  eval=TRUE, echo=TRUE}
 
 # Extract data from T2D for genomic feature Markers
-#stat <- getStat(GAlist=GAlist, trait="t2d", feature="Markers")
-#head(stat)
+stat <- getStat(GAlist=GAlist, trait="t2d", feature="Markers")
+head(stat)
+
+# Extract marker sets for ENSG00000147883 and plot
+rsids <- getSets(GAlist=GAlist,feature="Genes",featureID="ENSG00000147883")
+plot( y=-log10(stat[rsids,]$p),
+      x=stat[rsids,]$pos,
+      ylab="-log10(p)", xlab="Position",frame.plot=FALSE,main="ENSG00000147883")
 
 # Extract data from T2D for genomic feature Genes
 stat <- getStat(GAlist=GAlist, trait="t2d", feature="Genes")
@@ -88,4 +99,26 @@ writeStat(GAlist=GAlist, feature="Pathways", trait="t2d", file.csv="pathways_t2d
 writeStat(GAlist=GAlist, feature="ProteinComplexes", trait="t2d", file.csv="proteincomplexes_t2dm_gcta.csv")
 writeStat(GAlist=GAlist, feature="ChemicalComplexes", trait="t2d", file.csv="chemicalcomplexes_t2dm_gcta.csv")
 writeStat(GAlist=GAlist, feature="Genes", trait="t2d", file.csv="genes_t2dm_gcta.csv")
+```
+
+## Extract marker set data from GDT database {.unlisted .unnumbered} 
+The marker sets in the database can be extracted using: 
+```{r,  eval=TRUE, echo=TRUE}
+str(GAlist$gsets)
+geneSets <- getSets(GAlist=GAlist,feature="Genes")
+chemSets <- getSets(GAlist=GAlist,feature="ChemicalComplexes2Genes")
+
+```
+
+## Extract data for chemical "CIDm00004091" from GDT database {.unlisted .unnumbered} 
+The marker sets in the database can be extracted using: 
+```{r,  eval=TRUE, echo=TRUE}
+chemStat <- getStat(GAlist=GAlist, trait="t2d", feature="ChemicalComplexes", cls=c("p=1e.04","p=0.001","p=0.05","p=0.1","p=0.95"))
+chemStat["CIDm00004091",]
+
+genesStat <- getStat(GAlist=GAlist, trait="t2d", feature="Genes")
+ensgIDs <- getSets(GAlist=GAlist, feature="ChemicalComplexes2Genes", featureID="CIDm00004091")
+head(genesStat[ensgIDs,])
+
+
 ```
