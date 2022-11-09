@@ -1,5 +1,5 @@
 ---
-title: 'Brief introduction to Genomic informed Drug Target database'
+title: 'Brief Introduction to Genomic informed Drug Target database'
 author: "BALDER team"
 date: "`r Sys.Date()`"
 bibliography: qg2021.bib
@@ -23,7 +23,33 @@ echo_solution <- TRUE
 message <- FALSE
 ```
 
+
+We have developed scripts and workflows that efficiently generate functional marker data sets from publicly available resources. 
+Functional marker information has been downloaded and processed from:
+ 
+- Ensembl (link SNPs to genes and proteins)
+- GO (gene ontology)
+- STRING (protein-protein)
+- STITCH (protein-chemical)
+- Reactome (biological pathways)
+- more ressources will be added .....
+
+Processing included quality control, mapping to LD reference panel and creation of marker sets (e.g., markers linked to genes, proteins, pathways) used in marker set analyses and subsequently be used to help the biological interpretation of genome-wide association studies. 
+
+This includes screening functional marker sets (e.g. biological pathways, protein complexes, gene ontology terms) for association with complex diseases. 
+
+It is also possible to test specific biological hypothesis such as:
+
+Genes, proteins, metabolites, pathways underlying T2DM are enriched for association signal with T2DM 
+
+Drugs used for treatment of T2DM are linked to genes, proteins, metabolites, pathways enriched for association signal with T2DM 
+
+Our workflow allows us to quickly process new functional marker sets and we will therefore continue to identify and process functional marker data relevant for T2DM and other complex disease. 
+
 The practical is based on the R package `gact` (Rohde et al.2022)). This package provides an infrastructure for working with large-scale genomic association data linked to different types of genomic features.
+
+
+## Load packages used {.unlisted .unnumbered} 
 
 The most recent version of `gact` can be obtained from github:
 
@@ -32,28 +58,53 @@ library(devtools)
 devtools::install_github("psoerensen/gact")
 ```
 
-## Load packages used {.unlisted .unnumbered} 
-
 ```{r,  eval=eval, echo=TRUE}
 library(gact)
 library(qgg)
 library(corrplot)
+library(data.table)
 ```
 
 ## Download and install GDT database {.unlisted .unnumbered} 
 The function `gact()` dowload and install the GDT database: 
 ```{r,  eval=TRUE, echo=TRUE}
 # Set working for database
-setwd("C://Users//au223366//Dropbox//GitHub//gdtdb")
+dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
 
 # Download data bases from repository
-GAlist <- gact(version="t2dm-gact-0.0.1", task="download")
+GAlist <- gact(version="t2dm-gact-0.0.1", dbdir=dbdir, task="download")
 GAlist$features
+GAlist$studies
 
 # Information about features in GDT database
 GAlist$features
 
 ```
+
+## Add new summary statisticsto  GDT database {.unlisted .unnumbered} 
+The function `getStat()` extract data from the database: 
+```{r,  eval=FALSE, echo=TRUE}
+
+# CARDIoGRAMplusC4D.txt.gz
+fname_stat <- "C:/Users/au223366/Dropbox/Projects/balder/data/CARDIoGRAMplusC4D.txt.gz"
+stat <- fread(fname_stat, data.table=FALSE)
+head(stat)
+stat <- stat[, c(1:6,9:11)]
+colnames(stat) <- c("marker","chr", "pos", "ea", "nea", "eaf", "b", "seb", "p")
+
+GAlist <- updateStatDB(GAlist=GAlist,
+                       stat=stat,
+                       source="CARDIoGRAMplusC4D.txt.gz",
+                       trait="CAD",
+                       type = "binary",
+                       gender = "both",
+                       reference = "PMID:26343387",
+                       n = 184305,
+                       ncase = 60801,
+                       ncontrol = 123504)
+```
+
+
 
 ## Extract data from GDT database {.unlisted .unnumbered} 
 The function `getStat()` extract data from the database: 
