@@ -11,64 +11,12 @@ library(gact)
 
 
 
+
 ################################################################################
 # Continue processing external GWAS summary statistic data and add to database
 ################################################################################
 
-# Load  GAlist
 GAlist <- readRDS(file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
-
-
-
-# DIAMANTE-EAS.sumstat.txt.gz
-fname_stat <- "C:/Users/au223366/Dropbox/Projects/balder/data/DIAMANTE-EAS.sumstat.txt.gz"
-stat <- fread(fname_stat, data.table=FALSE)
-head(stat)
-stat <- stat[, c(4,1:2,5:10)]
-head(stat)
-colnames(stat) <- c("marker","chr", "pos", "ea", "nea", "eaf", "b", "seb", "p")
-
-GAlist <- updateStatDB(GAlist=GAlist,
-                       stat=stat,
-                       source="DIAMANTE-EAS.sumstat.txt.gz",
-                       trait="T2DM",
-                       type = "binary",
-                       gender = "both",
-                       reference = "PMID:35551307",
-                       n = 283423,
-                       ncase = 56268,
-                       ncontrol = 227155,
-                       writeStatDB=TRUE)
-
-
-# DIAMANTE-SAS.sumstat.txt.gz
-fname_stat <- "C:/Users/au223366/Dropbox/Projects/balder/data/DIAMANTE-SAS.sumstat.txt.gz"
-stat <- fread(fname_stat, data.table=FALSE)
-head(stat)
-stat <- stat[, c(4,1:2,5:10)]
-colnames(stat) <- c("marker","chr", "pos", "ea", "nea", "eaf", "b", "seb", "p")
-
-GAlist <- updateStatDB(GAlist=GAlist,
-                       stat=stat,
-                       source="DIAMANTE-SAS.sumstat.txt.gz",
-                       trait="T2DM",
-                       type = "binary",
-                       gender = "both",
-                       reference = "PMID:35551307",
-                       n = 49492,
-                       ncase = 16540,
-                       ncontrol = 32952,
-                       writeStatDB=TRUE)
-
-# Save updated GAlist
-#saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
-
-
-################################################################################
-# Continue processing external GWAS summary statistic data and add to database
-################################################################################
-
-#GAlist <- readRDS(file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
 
 
 
