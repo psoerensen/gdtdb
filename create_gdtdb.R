@@ -19,20 +19,29 @@ GAlist <- gact(version="t2dm-gact-0.0.1", dbdir=dbdir, task="download")
 # This step is only done once and the GAlist can be saved and used later
 saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
 
+
 ################################################################################
-# Create database infrastructure and GAlist
+# Create new database infrastructure and GAlist
 ################################################################################
 # Only used by me for now
 
 # Use this only if you ingest summary data from scratch
 dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
-GAlist <- createDB(Glist=NULL, version="t2dm-gact-0.0.1", dbdir=dbdir)
+GAlist <- createDB(Glist=NULL, version="t2dm-gact-0.0.2", dbdir=dbdir)
+GAlist <- downloadDB(GAlist=GAlist, what="marker")
+#GAlist <- downloadDB(GAlist=GAlist, what="gsea")
+
+
+# Use this only if you ingest summary data from scratch
+dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
+GAlist <- createDB(Glist=NULL, version="t2dm-gact-0.0.2", dbdir=dbdir)
 GAlist <- downloadDB(GAlist=GAlist, what="marker")
 GAlist <- downloadDB(GAlist=GAlist, what="gsets")
-GAlist <- downloadDB(GAlist=GAlist, what="gsea")
+#GAlist <- mapSetsDB(GAlist=GAlist)
 
 # This step is only done once and the GAlist can be saved and used later
-saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
+#saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
+saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.2.rds")
 
 
 ################################################################################
@@ -44,7 +53,8 @@ saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2d
 #https://www.nature.com/articles/s41588-022-01058-3
 
 
-GAlist <- readRDS(file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
+#GAlist <- readRDS(file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.1.rds")
+GAlist <- readRDS(file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.2.rds")
 
 # Mahajan.NatGenet2018b.T2D-noUKBB.European.txt
 fname_stat <- "C:/Users/au223366/Dropbox/Projects/balder/data/Mahajan.NatGenet2018b.T2D-noUKBB.European.txt"
@@ -53,22 +63,19 @@ head(stat)
 stat <- stat[, c("SNP","Chr","Pos","EA","NEA","EAF","Beta","SE","Pvalue")]
   colnames(stat) <- c("marker","chr", "pos", "ea", "nea", "eaf", "b", "seb", "p")
 
-# test comparing to qcStat in qgg
-#stat_EAF <- qcStat(Glist=Glist,stat=stat)
-#head(stat_EAF)
-#stat_NO_EAF  <- qcStat(Glist=Glist,stat=stat[,-6])
-#head(stat_NO_EAF)
-
 GAlist <- updateStatDB(GAlist=GAlist,
                        stat=stat,
                        source="Mahajan.NatGenet2018b.T2D-noUKBB.European.txt",
                        trait="T2DM",
                        type = "binary",
                        gender = "both",
+                       ancestry = "white",
+                       build = "GRCh37",
                        reference = "PMID:30297969",
                        n = 456236,
                        ncase = 55927,
                        ncontrol = 400309,
+                       comments = "No UK Biobank",
                        writeStatDB=TRUE)
 
 # CARDIoGRAMplusC4D.txt.gz
@@ -84,6 +91,8 @@ GAlist <- updateStatDB(GAlist=GAlist,
                        trait="CAD",
                        type = "binary",
                        gender = "both",
+                       ancestry = "white",
+                       build = "GRCh37",
                        reference = "PMID:26343387",
                        n = 184305,
                        ncase = 60801,
@@ -109,10 +118,13 @@ GAlist <- updateStatDB(GAlist=GAlist,
                        trait="T2DM",
                        type = "binary",
                        gender = "both",
+                       ancestry = "white",
+                       build = "GRCh37",
                        reference = "PMID:35551307",
                        n = 933970,
                        ncase = 80154,
                        ncontrol = 853816,
+                       comments = "Include UK Biobank",
                        writeStatDB=TRUE)
 
 
@@ -129,10 +141,13 @@ GAlist <- updateStatDB(GAlist=GAlist,
                        trait="T2DM",
                        type = "binary",
                        gender = "males",
+                       ancestry = "white",
+                       build = "GRCh37",
                        reference = "PMID:30297969",
                        n = 425662,
                        ncase = 41846,
                        ncontrol = 383816,
+                       comments = "Include UK Biobank",
                        writeStatDB=TRUE)
 
 
@@ -151,10 +166,13 @@ GAlist <- updateStatDB(GAlist=GAlist,
                        trait="T2DM",
                        type = "binary",
                        gender = "females",
+                       ancestry = "white",
+                       build = "GRCh37",
                        reference = "PMID:30297969",
                        n = 464379,
                        ncase = 30053,
                        ncontrol = 434326,
+                       comments = "Include UK Biobank",
                        writeStatDB=TRUE)
 
 
@@ -177,10 +195,13 @@ GAlist <- updateStatDB(GAlist=GAlist,
                        trait="T2DM",
                        type = "binary",
                        gender = "both",
+                       ancestry = "white",
+                       build = "GRCh37",
                        reference = "PMID:30297969",
                        n = 898130,
                        ncase = 74124,
                        ncontrol = 824006,
+                       comments = "Include UK Biobank",
                        writeStatDB=TRUE)
 
 
