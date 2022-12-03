@@ -26,9 +26,9 @@ saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2d
 # Only used by me for now
 
 # Use this only if you ingest summary data from scratch
-dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
-GAlist <- createDB(Glist=NULL, version="t2dm-gact-0.0.2", dbdir=dbdir)
-GAlist <- downloadDB(GAlist=GAlist, what="marker")
+#dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
+#GAlist <- createDB(Glist=NULL, version="t2dm-gact-0.0.2", dbdir=dbdir)
+#GAlist <- downloadDB(GAlist=GAlist, what="marker")
 #GAlist <- downloadDB(GAlist=GAlist, what="gsea")
 
 
@@ -205,6 +205,7 @@ GAlist <- updateStatDB(GAlist=GAlist,
                        writeStatDB=TRUE)
 
 
+saveRDS(GAlist, file="C:/Users/au223366/Dropbox/Projects/balder/gdtdb/GAlist_t2dm-gact-0.0.2.rds")
 
 
 ################################################################################
