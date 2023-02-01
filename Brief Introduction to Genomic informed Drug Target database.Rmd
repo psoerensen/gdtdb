@@ -1,0 +1,207 @@
+---
+title: 'Brief Introduction to Genomic informed Drug Target database'
+author: "BALDER team"
+date: "`r Sys.Date()`"
+bibliography: qg2021.bib
+biblio-style: apalike
+link-citations: yes
+output:
+  bookdown::pdf_document2:
+    dev: png
+    includes:
+      in_header: preamble.tex
+  html_document:
+    includes:
+      in_header: mathjax_header.html
+---
+
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, tidy.opts = list(width.cutoff = 70), tidy = TRUE)
+eval <- TRUE
+echo_solution <- TRUE
+message <- FALSE
+```
+
+
+We have developed scripts and workflows that efficiently generate functional marker data sets from publicly available resources. 
+Functional marker information has been downloaded and processed from:
+ 
+- Ensembl (link SNPs to genes and proteins)
+- GO (gene ontology)
+- STRING (protein-protein)
+- STITCH (protein-chemical)
+- Reactome (biological pathways)
+- more ressources will be added .....
+
+Processing included quality control, mapping to LD reference panel and creation of marker sets (e.g., markers linked to genes, proteins, pathways) used in marker set analyses and subsequently be used to help the biological interpretation of genome-wide association studies. 
+
+This includes screening functional marker sets (e.g. biological pathways, protein complexes, gene ontology terms) for association with complex diseases. 
+
+It is also possible to test specific biological hypothesis such as:
+
+Genes, proteins, metabolites, pathways underlying T2DM are enriched for association signal with T2DM 
+
+Drugs used for treatment of T2DM are linked to genes, proteins, metabolites, pathways enriched for association signal with T2DM 
+
+Our workflow allows us to quickly process new functional marker sets and we will therefore continue to identify and process functional marker data relevant for T2DM and other complex disease. 
+
+The practical is based on the R package `gact` (Rohde et al.2022)). This package provides an infrastructure for working with large-scale genomic association data linked to different types of genomic features.
+
+
+## Load packages used {.unlisted .unnumbered} 
+
+The most recent version of `gact` can be obtained from github:
+
+```{r,  eval=FALSE, echo=TRUE}
+library(devtools)
+devtools::install_github("psoerensen/gact")
+```
+
+```{r,  eval=eval, echo=TRUE}
+library(gact)
+library(qgg)
+library(corrplot)
+library(data.table)
+```
+
+## Download and install GDT database {.unlisted .unnumbered} 
+The function `gact()` dowload and install the GDT database: 
+```{r,  eval=TRUE, echo=TRUE}
+# Set working for database
+dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
+
+# Download data bases from repository
+GAlist <- gact(version="t2dm-gact-0.0.5", dbdir=dbdir, task="download")
+
+# Information about studies in GDT database
+GAlist$study
+
+# Information about features in GDT database
+GAlist$features
+
+
+```
+
+
+## Extract data from GDT database {.unlisted .unnumbered} 
+The function `getStatDB()` extract data from the database: 
+```{r,  eval=TRUE, echo=TRUE}
+
+# Extract marker summary statistics GWAS1
+stat <- getMarkerStatDB(GAlist=GAlist, studyID="GWAS1")
+head(stat)
+rownames(stat) <- stat$rsids
+
+# Extract marker sets for gene ENSG00000147883
+sets <- getSetsDB(GAlist=GAlist, feature="Genes",featureID="ENSG00000147883")
+# sets is a list
+str(sets)
+# convert sets into a vector
+rsids <- sets[[1]]
+#select rsids in stat object
+rsids <- rsids[rsids%in%stat$rsids]
+
+# Plot -log10 p-values for selected gene
+plot( y=-log10(stat[rsids,"p"]),
+      x=stat[rsids,"pos"],
+      ylab="-log10(p)", xlab="Position",frame.plot=FALSE,main="ENSG00000147883")
+
+# Extract data for GWAS1 for genomic feature Genes
+stat <- getStatDB(GAlist=GAlist, studyID="GWAS1", feature="Genes", format="data.frame")
+head(stat)
+
+# Plot results
+plot(x=stat$stat/stat$m,y=-log10(stat$p), ylab="-log10 p-values", xlab="Average signal per SNP",frame.plot=FALSE,main="Genes")
+
+# Extract data for GWAS1 for genomic feature Gene Ontology (GO) where output format is a data frame
+stat <- getStatDB(GAlist=GAlist, studyID="GWAS1", feature="GO")
+str(stat)
+plot(x=stat$stat/stat$m,y=-log10(stat$p), ylab="-log10 p-values", xlab="Average signal per SNP",frame.plot=FALSE,main="GO")
+
+# Extract data from T2D for genomic feature Gene Ontology (GO) where output format is list
+stat <- getStatDB(GAlist=GAlist, feature="GO")
+str(stat)
+
+library(corrplot)
+
+# Plot results for genomic feature Gene Ontology (GO)
+colbar <- colorRampPalette(c("#FFFFFF", "#D1E5F0", "#92C5DE",
+                             "#4393C3", "#2166AC", "#053061"))
+corrplot(-log10(stat$p[1:10,]), is.corr=FALSE,
+         tl.cex=0.7, tl.srt=45, col=colbar(6),
+         cl.pos="n", mar = c(1, 1, 1, 1))
+
+# Extract results from gsea of Reactome pathways
+stat <- getStatDB(GAlist=GAlist, feature="Genes", studyID="GWAS1")
+str(stat)
+
+# Select the top pathways for GWAS1
+featureID <- names(stat$p[stat$p<0.01])
+stat <- getStatDB(GAlist=GAlist, feature="Genes", studyID="GWAS1", featureID=featureID)
+str(stat)
+
+# Get marker stat for GWAS1 and GWAS2
+stat <- getMarkerStatDB(GAlist=GAlist, studyID=c("GWAS1","GWAS2"))
+str(stat)
+
+# Get gene-level association statistics (i.e. sum of )
+stat <- getStatDB(GAlist=GAlist, feature="Genes", threshold=0.05, studyID="GWAS1")
+y <- scale(stat$stat)
+
+# Adjust for gene length
+y <- residuals(lm(y~stat$m))
+hist(y)
+
+# Get design matrix for gene sets
+sets <- getSetsDB(GAlist=GAlist, feature="Pathways")
+W <- designSetsDB(GAlist=GAlist, feature="Pathways", rowFeatureID=names(y))
+W <- scale(W)
+
+
+# Fit BLR model
+fit <- gbayes(y=y, W=W, method="bayesC")
+
+# Plot some BLR result
+layout(matrix(1:2,ncol=2))
+plot(fit$dm)
+plot(fit$bm)
+
+```
+
+## Extract and write data from GDT database {.unlisted .unnumbered} 
+The function `writeStat()` extract and write data from the database: 
+```{r,  eval=TRUE, echo=TRUE}
+writeStatDB(GAlist=GAlist, feature="GO", studyID="GWAS1", file.csv="go_GWAS1_gcta.csv")
+writeStatDB(GAlist=GAlist, feature="Pathways", studyID="GWAS1", file.csv="pathways_GWAS1_gcta.csv")
+writeStatDB(GAlist=GAlist, feature="ProteinComplexes", studyID="GWAS1", file.csv="proteincomplexes_GWAS1_gcta.csv")
+writeStatDB(GAlist=GAlist, feature="ChemicalComplexes", studyID="GWAS1", file.csv="chemicalcomplexes_GWAS1_gcta.csv")
+writeStatDB(GAlist=GAlist, feature="Genes", studyID="GWAS1", file.csv="genes_GWAS1_gcta.csv")
+```
+
+## Extract marker set data from GDT database {.unlisted .unnumbered} 
+The marker sets in the database can be extracted using: 
+```{r,  eval=TRUE, echo=TRUE}
+geneSets <- getSetsDB(GAlist=GAlist,feature="Genes")
+chemSets <- getSetsDB(GAlist=GAlist,feature="ChemicalComplexes2Genes")
+
+```
+
+## Extract data for chemical "CIDm00004091" from GDT database {.unlisted .unnumbered} 
+The marker sets in the database can be extracted using: 
+```{r,  eval=TRUE, echo=TRUE}
+chemStat <- getStatDB(GAlist=GAlist, studyID="GWAS1", feature="ChemicalComplexes", format="data.frame")
+chemStat["CIDm00004091",]
+
+genesStat <- getStatDB(GAlist=GAlist, studyID="GWAS1", feature="Genes", format="data.frame")
+sets <- getSetsDB(GAlist=GAlist, feature="ChemicalComplexes2Genes", featureID="CIDm00004091")
+# sets is a list
+str(sets)
+ensgIDs <- sets[[1]]
+# convert sets into a vector
+ensgIDs <- sets[[1]]
+#select rsids in stat object
+ensgIDs <- ensgIDs[ensgIDs%in%rownames(genesStat)]
+
+head(genesStat[ensgIDs,])
+```
