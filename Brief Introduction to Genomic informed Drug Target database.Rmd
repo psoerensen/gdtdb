@@ -26,11 +26,11 @@ message <- FALSE
 
 # Introduction {.unlisted .unnumbered} 
 
+Here we provide scripts and workflows that provides an infrastructure for working with large-scale genomic association data linked to different types of functional marker sets from publicly available resources. 
+
 The discovery of novel genetic markers associated with complex diseases such as Type 2 Diabetes can help identify biomarkers and potential drug targets for the disease including 1) genes and regulatory elements located nearby disease-associated variants or biological pathway, and 2) biomarkers 
 (transcriptome, metabolome and proteome) whose association signals are linked to disease associated signals. This is relevant to the drug target discovery process because the genetic variants that alter a biological process can help determine whether a drug that was designed to target that same process might work. Because the impact of the genetic variant is studied in humans directly, it is a powerful way to check how a drug will work in people, which does 
 not rely solely on computer or animal models of human disease.
-
-Here we provide scripts and workflows that provides an infrastructure for working with large-scale genomic association data linked to different types of functional marker sets from publicly available resources. 
 
 Functional marker information has been downloaded and processed from:
  
@@ -52,11 +52,9 @@ It is also possible to test specific biological hypothesis such as:
 
 Our workflow allows us to quickly process new functional marker sets and we will therefore continue to identify and process functional marker data relevant for T2DM and other complex disease. 
 
-The practical is based on the R package `gact` (Rohde et al.2022)). This package provides an infrastructure for working with large-scale genomic association data linked to different types of genomic features.
-
 
 ## Load packages used {.unlisted .unnumbered} 
-
+The practical is based on the R package `gact` (Sørensen et al.2022). 
 The most recent version of `gact` can be obtained from github:
 
 ```{r,  eval=FALSE, echo=TRUE}
@@ -75,7 +73,7 @@ library(data.table)
 The function `gact()` dowload and install the GDT database: 
 ```{r,  eval=FALSE, echo=TRUE}
 # Set working for database
-dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
+dbdir <- "C:/Projects/balder/gdtdb"
 
 # Download the database from repository
 GAlist <- gact(version="gact-0.0.1", dbdir=dbdir, task="download")
