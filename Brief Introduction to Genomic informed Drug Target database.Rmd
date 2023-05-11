@@ -1,6 +1,14 @@
 ---
-title: 'Brief Introduction to Genomic informed Drug Target database'
-author: "BALDER team"
+title: 'Brief Introduction to Genomic informed Drug Target Database'
+author: 
+ - Merina Shrestha
+ - Zhonghao Bai
+ - Astrid Johanneson Hjelholtz
+ - Tahereh Gholipour
+ - Viktor Milkevych
+ - Palle Duun Rohde
+ - Mads Fuglsang Kjølby
+ - Peter Sørensen
 date: "`r Sys.Date()`"
 bibliography: qg2021.bib
 biblio-style: apalike
@@ -15,9 +23,10 @@ output:
       in_header: mathjax_header.html
 ---
 
-
-```{r setup, include=FALSE} 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, tidy.opts = list(width.cutoff = 70), tidy = TRUE)
+```{r, echo = F}
+#install.packages("formatR", repos = "http://cran.rstudio.com")
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
 eval <- TRUE
 echo_solution <- TRUE
 message <- FALSE
@@ -67,20 +76,27 @@ library(data.table)
 
 ## Download and install GDT database {.unlisted .unnumbered} 
 The function `gact()` dowload and install the GDT database: 
-```{r,  eval=TRUE, echo=TRUE}
+```{r,  eval=FALSE, echo=TRUE}
 # Set working for database
 dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
 
-# Download data bases from repository
-GAlist <- gact(version="t2dm-gact-0.0.5", dbdir=dbdir, task="download")
+# Download the database from repository
+GAlist <- gact(version="gact-0.0.1", dbdir=dbdir, task="download")
+```
 
+```{r,  eval=TRUE, echo=FALSE}
+dbdir <- "C:/Users/au223366/Dropbox/Projects/balder/gdtdb"
+GAlist <- readRDS(file=file.path(dbdir, "GAlist_gact-0.0.1.rds"))
+```
+
+
+## Study and feature information in the database {.unlisted .unnumbered} 
+```{r,  eval=TRUE, echo=TRUE}
 # Information about studies in GDT database
-GAlist$study
+head(as.data.frame(GAlist$study))
 
 # Information about features in GDT database
 GAlist$features
-
-
 ```
 
 
@@ -89,89 +105,91 @@ The function `getStatDB()` extract data from the database:
 ```{r,  eval=TRUE, echo=TRUE}
 
 # Extract marker summary statistics GWAS1
-stat <- getMarkerStatDB(GAlist=GAlist, studyID="GWAS1")
+stat <- getMarkerStatDB(GAlist = GAlist, studyID = "GWAS1")
 head(stat)
 rownames(stat) <- stat$rsids
 
 # Extract marker sets for gene ENSG00000147883
-sets <- getSetsDB(GAlist=GAlist, feature="Genes",featureID="ENSG00000147883")
+sets <- getSetsDB(GAlist = GAlist, feature = "Genes", featureID = "ENSG00000147883")
 # sets is a list
 str(sets)
 # convert sets into a vector
 rsids <- sets[[1]]
-#select rsids in stat object
-rsids <- rsids[rsids%in%stat$rsids]
 
 # Plot -log10 p-values for selected gene
-plot( y=-log10(stat[rsids,"p"]),
-      x=stat[rsids,"pos"],
-      ylab="-log10(p)", xlab="Position",frame.plot=FALSE,main="ENSG00000147883")
+plot(y = -log10(stat[stat$rsids %in% rsids, "p"]), x = stat[stat$rsids %in%
+    rsids, "pos"], ylab = "-log10(p)", xlab = "Position", frame.plot = FALSE,
+    main = "ENSG00000147883")
 
 # Extract data for GWAS1 for genomic feature Genes
-stat <- getStatDB(GAlist=GAlist, studyID="GWAS1", feature="Genes", format="data.frame")
+stat <- getStatDB(GAlist = GAlist, studyID = "GWAS1", feature = "Genes",
+    format = "data.frame")
 head(stat)
 
 # Plot results
-plot(x=stat$stat/stat$m,y=-log10(stat$p), ylab="-log10 p-values", xlab="Average signal per SNP",frame.plot=FALSE,main="Genes")
+plot(x = stat$stat/stat$m, y = -log10(stat$p), ylab = "-log10 p-values",
+    xlab = "Average signal per SNP", frame.plot = FALSE, main = "Genes")
 
-# Extract data for GWAS1 for genomic feature Gene Ontology (GO) where output format is a data frame
-stat <- getStatDB(GAlist=GAlist, studyID="GWAS1", feature="GO")
+# Extract data for GWAS1 for genomic feature Gene Ontology (GO) where
+# output format is a data frame
+stat <- getStatDB(GAlist = GAlist, studyID = "GWAS1", feature = "GO")
 str(stat)
-plot(x=stat$stat/stat$m,y=-log10(stat$p), ylab="-log10 p-values", xlab="Average signal per SNP",frame.plot=FALSE,main="GO")
+plot(x = stat$stat/stat$m, y = -log10(stat$p), ylab = "-log10 p-values",
+    xlab = "Average signal per SNP", frame.plot = FALSE, main = "GO")
 
-# Extract data from T2D for genomic feature Gene Ontology (GO) where output format is list
-stat <- getStatDB(GAlist=GAlist, feature="GO")
+# Extract data from T2D for genomic feature Gene Ontology (GO) where
+# output format is list
+stat <- getStatDB(GAlist = GAlist, feature = "GO")
 str(stat)
 
 library(corrplot)
 
 # Plot results for genomic feature Gene Ontology (GO)
-colbar <- colorRampPalette(c("#FFFFFF", "#D1E5F0", "#92C5DE",
-                             "#4393C3", "#2166AC", "#053061"))
-corrplot(-log10(stat$p[1:10,]), is.corr=FALSE,
-         tl.cex=0.7, tl.srt=45, col=colbar(6),
-         cl.pos="n", mar = c(1, 1, 1, 1))
+colbar <- colorRampPalette(c("#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3",
+    "#2166AC", "#053061"))
+corrplot(-log10(stat$p[1:10, ]), is.corr = FALSE, tl.cex = 0.7, tl.srt = 45,
+    col = colbar(6), cl.pos = "n", mar = c(1, 1, 1, 1))
 
 # Extract results from gsea of Reactome pathways
-stat <- getStatDB(GAlist=GAlist, feature="Genes", studyID="GWAS1")
+stat <- getStatDB(GAlist = GAlist, feature = "Genes", studyID = "GWAS1")
 str(stat)
 
 # Select the top pathways for GWAS1
-featureID <- names(stat$p[stat$p<0.01])
-stat <- getStatDB(GAlist=GAlist, feature="Genes", studyID="GWAS1", featureID=featureID)
+featureID <- names(stat$p[stat$p < 0.01])
+stat <- getStatDB(GAlist = GAlist, feature = "Genes", studyID = "GWAS1",
+    featureID = featureID)
 str(stat)
 
 # Get marker stat for GWAS1 and GWAS2
-stat <- getMarkerStatDB(GAlist=GAlist, studyID=c("GWAS1","GWAS2"))
+stat <- getMarkerStatDB(GAlist = GAlist, studyID = c("GWAS1", "GWAS2"))
 str(stat)
 
 # Get gene-level association statistics (i.e. sum of )
-stat <- getStatDB(GAlist=GAlist, feature="Genes", threshold=0.05, studyID="GWAS1")
+stat <- getStatDB(GAlist = GAlist, feature = "Genes", threshold = 0.95,
+    studyID = "GWAS1")
 y <- scale(stat$stat)
 
 # Adjust for gene length
-y <- residuals(lm(y~stat$m))
+y <- residuals(lm(y ~ stat$m))
 hist(y)
 
 # Get design matrix for gene sets
-sets <- getSetsDB(GAlist=GAlist, feature="Pathways")
-W <- designSetsDB(GAlist=GAlist, feature="Pathways", rowFeatureID=names(y))
+W <- designMatrixDB(GAlist = GAlist, feature = "Pathways", rowFeatureID = names(y))
 W <- scale(W)
 
 
 # Fit BLR model
-fit <- gbayes(y=y, W=W, method="bayesC")
+fit <- gbayes(y = y, W = W, method = "bayesC")
 
 # Plot some BLR result
-layout(matrix(1:2,ncol=2))
+layout(matrix(1:2, ncol = 2))
 plot(fit$dm)
 plot(fit$bm)
-
 ```
 
 ## Extract and write data from GDT database {.unlisted .unnumbered} 
 The function `writeStat()` extract and write data from the database: 
-```{r,  eval=TRUE, echo=TRUE}
+```{r,  eval=FALSE, echo=TRUE}
 writeStatDB(GAlist=GAlist, feature="GO", studyID="GWAS1", file.csv="go_GWAS1_gcta.csv")
 writeStatDB(GAlist=GAlist, feature="Pathways", studyID="GWAS1", file.csv="pathways_GWAS1_gcta.csv")
 writeStatDB(GAlist=GAlist, feature="ProteinComplexes", studyID="GWAS1", file.csv="proteincomplexes_GWAS1_gcta.csv")
@@ -205,3 +223,70 @@ ensgIDs <- ensgIDs[ensgIDs%in%rownames(genesStat)]
 
 head(genesStat[ensgIDs,])
 ```
+
+
+## Process external GWAS summary statistic data and add to database {.unlisted .unnumbered} 
+library(data.table)
+
+```{r,  eval=FALSE, echo=TRUE}
+# Load GAlist
+GAlist <- readRDS(file = file.path(dbdir, "GAlist_gact-0.0.1.rds"))
+
+# Add Meta-analysis of BMI in UK Biobank and GIANT data.  Combined
+# set of samples, max N = 697,734.
+fname_stat <- "https://portals.broadinstitute.org/collaboration/giant/images/1/14/Bmi.giant-ukbb.meta-analysis.combined.23May2018.HapMap2_only.txt.gz"
+stat <- fread(fname_stat, data.table = FALSE)
+stat <- stat[, c("SNP", "CHR", "POS", "Tested_Allele", "Other_Allele",
+    "Freq_Tested_Allele", "BETA", "SE", "P")]
+colnames(stat) <- c("marker", "chr", "pos", "ea", "nea", "eaf", "b", "seb",
+    "p")
+head(stat)
+
+GAlist <- updateStatDB(GAlist = GAlist, 
+                       stat = stat, 
+                       source = "bmi.giant-ukbb.meta-analysis.combined.23May2018.txt.gz",
+                       trait = "BMI", 
+                       type = "quantitative", 
+                       gender = "both", 
+                       ancestry = "White",
+                       build = "GRCh37", 
+                       reference = "PMID:30239722", 
+                       n = 505454, 
+                       ncase = 0,
+                       ncontrol = 0, 
+                       comments = "Meta-analysis", 
+                       writeStatDB = TRUE, 
+                       excludeMAFDIFF = 0.05)
+
+# Save updated GAlist
+saveRDS(GAlist, file = file.path(dbdir, "GAlist_gact-0.0.1.rds"))
+```
+
+
+## Shiny Apps to use genomic informed drug target database {.unlisted .unnumbered} 
+These app provides an interface for conducting a range of
+gene set enrichment analyses and visualizing the results in
+various formats.The interface includes a title panel and a sidebar
+layout with input controls for selecting the study, entering gene
+symbols, and specifying analysis parameters. The main panel
+displays the results of the analysis in several tabs, including
+data tables, a Manhattan plot, and information about
+available studies.
+
+```{r,  eval=FALSE, echo=TRUE}
+# Load GAlist
+GAlist <- readRDS(file=file.path(dbdir, "GAlist_gact-0.0.1.rds"))
+
+# Shiny App for Gene Set Enrichment Analysis of Gene Complexes
+shinyAppsDB(GAlist=GAlist, what="customGSEA")
+
+# Shiny App for Gene Set Enrichment Analysis of Genomic Features
+shinyAppsDB(GAlist=GAlist, what="featureGSEA")
+
+# Shiny App for Drug Target Analysis of a Specific Genomic Features
+shinyAppsDB(GAlist=GAlist, what="featureDRUGS")
+```
+
+
+
+
