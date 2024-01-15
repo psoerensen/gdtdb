@@ -1,0 +1,100 @@
+################################################################################
+# Gene analysis using VEGAS
+################################################################################
+#
+#library(devtools)
+#devtools::install_github("psoerensen/gact")
+#devtools::install_github("psoerensen/qgg")
+#
+################################################################################
+
+
+library(qgg)
+library(gact)
+library(ggcorrplot)
+
+
+# Load GAlist with information on gact database
+GAlist <- readRDS(file="/faststorage/project/ukbiobank/projects/gact/hsa.0.0.1/GAlist_hsa.0.0.1.rds")
+
+# Check studies in gact database
+GAlist$studies
+
+# Extract gene-marker sets
+markerSets <- getMarkerSetsDB(GAlist = GAlist, feature = "Genesplus")
+
+
+################################################################################
+# VEGAS for a multiple traits/studies (EUR)
+################################################################################
+
+# Select study
+studyID <- paste0("GWAS",c(1:2, 4:6))
+
+# Load Glist with information on 1000G (EUR)
+Glist <- readRDS(file=file.path(GAlist$dirs["marker"],"Glist_1000G_eur_filtered.rds"))
+
+# Identify high quality genetic markers in 1000G
+rsids <- gfilter(Glist = Glist,
+                 excludeMAF = 0.01,
+                 excludeMISS = 0.05,
+                 excludeCGAT = TRUE,
+                 excludeINDEL = TRUE,
+                 excludeDUPS = TRUE,
+                 excludeHWE = 1e-12,
+                 excludeMHC = FALSE)
+
+# Get GWAS summary statistics from gact database
+p <- getMarkerStatDB(GAlist=GAlist, studyID=studyID,
+                     what="p", rsids=rsids)
+dim(p)
+
+# Gene analysis using VEGAS
+res <- qgg:::vegas(Glist=Glist, sets=markerSets, p=p, verbose=TRUE)
+saveRDS(res, file=file.path(GAlist$dirs["gsea"],"vegas_eur_filtered.rds"))
+
+
+################################################################################
+# VEGAS for a single trait/study (EAS)
+################################################################################
+
+# Select study
+studyID <- "GWAS7"
+
+# Load Glist with information on 1000G (EAS)
+Glist <- readRDS(file=file.path(GAlist$dirs["marker"],"Glist_1000G_eas_filtered.rds"))
+
+# Get GWAS summary statistics from gact database
+stat <- getMarkerStatDB(GAlist=GAlist, studyID=studyID)
+
+# Check and align summary statistics based on marker information in Glist
+stat <- checkStat(Glist=Glist, stat=stat)
+
+# Gene analysis using VEGAS
+res <- qgg:::vegas(Glist=Glist, sets=markerSets, stat=stat, verbose=TRUE)
+saveRDS(res, file=file.path(GAlist$dirs["gsea"],"vegas_eas_filtered.rds"))
+
+
+################################################################################
+# VEGAS for a single trait/study (SAS)
+################################################################################
+
+# Select study
+studyID <- "GWAS8"
+
+# Load Glist with information on 1000G (SAS)
+Glist <- readRDS(file=file.path(GAlist$dirs["marker"],"Glist_1000G_sas_filtered.rds"))
+
+# Get GWAS summary statistics from gact database
+stat <- getMarkerStatDB(GAlist=GAlist, studyID=studyID)
+stat$ea <- toupper(stat$ea)
+stat$nea <- toupper(stat$nea)
+
+# Check and align summary statistics based on marker information in Glist
+stat <- checkStat(Glist=Glist, stat=stat)
+
+# Gene analysis using VEGAS
+res <- qgg:::vegas(Glist=Glist, sets=markerSets, stat=stat, verbose=TRUE)
+saveRDS(res, file=file.path(GAlist$dirs["gsea"],"vegas_sas_filtered.rds"))
+
+

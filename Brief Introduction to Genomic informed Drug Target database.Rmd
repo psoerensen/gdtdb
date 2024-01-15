@@ -25,32 +25,15 @@ message <- FALSE
 ```
 
 # Introduction {.unlisted .unnumbered} 
+Here we release scripts and workflows that provide an infrastructure for efficiently working with large-scale genomic association data, specifically linked to various types of functional marker sets obtained from publicly available resources. This framework enables the exploration of novel genetic markers associated with complex diseases such as Type 2 Diabetes, facilitating the identification of biomarkers and potential drug targets.
 
-Here we provide scripts and workflows that provides an infrastructure for working with large-scale genomic association data linked to different types of functional marker sets from publicly available resources. 
+One key aspect is the investigation of genes, regulatory elements, and biological pathways that are closely associated with disease-associated variants. Additionally, we explore biomarkers (including transcriptome, metabolome, and proteome) whose association signals are linked to disease-related signals. This comprehensive approach aids in the discovery of biomarkers and potential drug targets, ensuring an informed drug target discovery process. By studying the impact of genetic variants directly in humans, we can better assess the effectiveness of drugs targeting specific biological processes, surpassing reliance solely on computer or animal models.
 
-The discovery of novel genetic markers associated with complex diseases such as Type 2 Diabetes can help identify biomarkers and potential drug targets for the disease including 1) genes and regulatory elements located nearby disease-associated variants or biological pathway, and 2) biomarkers 
-(transcriptome, metabolome and proteome) whose association signals are linked to disease associated signals. This is relevant to the drug target discovery process because the genetic variants that alter a biological process can help determine whether a drug that was designed to target that same process might work. Because the impact of the genetic variant is studied in humans directly, it is a powerful way to check how a drug will work in people, which does 
-not rely solely on computer or animal models of human disease.
+To accomplish this, we download and process functional marker information from various sources, including Ensembl (linking SNPs to genes and proteins), GO (Gene Ontology), STRING (protein-protein interactions), STITCH (protein-chemical interactions), Reactome (biological pathways), and the GWAS Catalog. Our processing pipeline includes quality control of GWAS summary statistics, mapping to LD reference panels, and the creation of marker sets linked to genes, proteins, and pathways. These marker sets facilitate marker set analyses and aid in the biological interpretation of genome-wide association studies, specifically by assessing the association of functional marker sets (e.g., biological pathways, protein complexes, gene ontology terms) with complex diseases.
 
-Functional marker information has been downloaded and processed from:
- 
-- Ensembl (link SNPs to genes and proteins)
-- GO (gene ontology)
-- STRING (protein-protein)
-- STITCH (protein-chemical)
-- Reactome (biological pathways)
-- GWAS Catalog
-- more ressources will be added .....
+Moreover, our workflow allows for the testing of specific biological hypotheses. For example, we can assess if genes, proteins, metabolites, and pathways underlying Type 2 Diabetes are enriched for association signals with the disease. Additionally, we can explore if drugs used in the treatment of Type 2 Diabetes are associated with genes, proteins, metabolites, and pathways that display enriched association signals.
 
-Processing included quality control of GWAS summary statistics, mapping to LD reference panel and creation of marker sets (e.g., markers linked to genes, proteins, pathways) used in marker set analyses and subsequently be used to help the biological interpretation of genome-wide association studies. This includes screening functional marker sets (e.g. biological pathways, protein complexes, gene ontology terms) for association with complex diseases.
-
-It is also possible to test specific biological hypothesis such as:
-
-- Genes, proteins, metabolites, pathways underlying T2DM are enriched for association signal with T2DM 
-
-- Drugs used for treatment of T2DM are linked to genes, proteins, metabolites, pathways enriched for association signal with T2DM 
-
-Our workflow allows us to quickly process new functional marker sets and we will therefore continue to identify and process functional marker data relevant for T2DM and other complex disease. 
+By continually incorporating new functional marker sets into our workflow, we ensure the ability to identify and process relevant data for Type 2 Diabetes and other complex diseases, providing valuable insights for ongoing research.
 
 
 ## Load packages used {.unlisted .unnumbered} 
